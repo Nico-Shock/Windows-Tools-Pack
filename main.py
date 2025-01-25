@@ -1,78 +1,191 @@
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
-import tkinter as tk
+import subprocess
 import sys
 
-def execute_script():
-    """Function to execute the main script logic"""
-    print("Script execution started...")  # Add your customization logic here later
-    root.destroy()  # Close the window after execution
+PROGRAM_LIST = [
+    "- Win11 Debloat Script by Raphire",
+    "- UltraUXThemePatcher",
+    "- Mica for Everyone .NET Core 3.1",
+    "- StartAllBack",
+    "- ExplorerBlurMica",
+    "- Windhawk",
+    "- Seelen UI"
+]
 
-# Create main window
-root = ttk.Window(themename="darkly")
-root.title("Windows Customization Script")
-root.geometry("500x200")
-root.resizable(False, False)
+class InstallationGUI:
+    def __init__(self):
+        """Initialize main application window"""
+        self.root = ttk.Window(themename="darkly")
+        self.setup_base_gui()
+        self.create_main_screen()
 
-# Main frame container
-main_frame = ttk.Frame(root)
-main_frame.pack(padx=20, pady=20, fill='both', expand=True)
+    def setup_base_gui(self):
+        """Configure base window settings"""
+        self.root.title("Windows Customization Suite")
+        self.root.geometry("600x400")
+        self.root.resizable(False, False)
+        self.center_window()
 
-# Heading label
-label = ttk.Label(
-    master=main_frame,
-    text="Welcome to my Windows Customization Script!\nDo you want to execute the programs below?",
-    font=('Segoe UI', 12),
-    wraplength=400,
-    justify='center'
-)
-label.pack(pady=10)
+    def center_window(self):
+        """Center the window on screen"""
+        self.root.update_idletasks()
+        screen_width = self.root.winfo_screenwidth()
+        screen_height = self.root.winfo_screenheight()
+        x = (screen_width // 2) - (600 // 2)
+        y = (screen_height // 2) - (400 // 2)
+        self.root.geometry(f'+{x}+{y}')
 
-# Placeholder for program list
-programs_label = ttk.Label(
-    master=main_frame,
-    text="[Program list will be added here]",
-    font=('Segoe UI', 10),
-    foreground='gray'
-)
-programs_label.pack(pady=5)
+    def create_main_screen(self):
+        """Create initial screen with program list"""
+        self.clear_window()
+        
+        # Main content container
+        main_frame = ttk.Frame(self.root)
+        main_frame.pack(padx=20, pady=20, fill='both', expand=True)
 
-# Button container frame
-button_frame = ttk.Frame(main_frame)
-button_frame.pack(pady=15)
+        # Header section
+        header_frame = ttk.Frame(main_frame)
+        header_frame.pack(fill='x', pady=10)
+        
+        ttk.Label(
+            header_frame,
+            text="Windows Customization Script\n(Windows 10/11 Only)",
+            font=('Segoe UI', 16, 'bold'),
+            justify='center'
+        ).pack(pady=5)
 
-# Action buttons
-yes_btn = ttk.Button(
-    master=button_frame,
-    text="Yes",
-    command=execute_script,
-    bootstyle=SUCCESS,
-    width=10
-)
-yes_btn.grid(row=0, column=0, padx=5, sticky='w')
+        # Program list display
+        program_text = "\n".join(PROGRAM_LIST)
+        list_frame = ttk.Frame(main_frame)
+        list_frame.pack(fill='both', expand=True, pady=15)
+        
+        ttk.Label(
+            list_frame,
+            text=program_text,
+            font=('Consolas', 12),
+            foreground='#cccccc',
+            justify='left'
+        ).pack(anchor='w')
 
-no_btn = ttk.Button(
-    master=button_frame,
-    text="No",
-    command=lambda: sys.exit(),
-    bootstyle=DANGER,
-    width=10
-)
-no_btn.grid(row=0, column=1, padx=5, sticky='e')
+        # Button container with swapped positions
+        btn_frame = ttk.Frame(main_frame)
+        btn_frame.pack(side='bottom', pady=20, fill='x', expand=False)
 
-# Configure grid columns for proper spacing
-button_frame.columnconfigure(0, weight=1)
-button_frame.columnconfigure(1, weight=1)
+        # Cancel button (left side)
+        ttk.Button(
+            btn_frame,
+            text="Cancel",
+            command=sys.exit,
+            bootstyle=DANGER,
+            width=15
+        ).pack(side='left', padx=10)
 
-# Center window on screen
-root.update_idletasks()
-screen_width = root.winfo_screenwidth()
-screen_height = root.winfo_screenheight()
-window_width = root.winfo_width()
-window_height = root.winfo_height()
-x = (screen_width // 2) - (window_width // 2)
-y = (screen_height // 2) - (window_height // 2)
-root.geometry(f'+{x}+{y}')
+        # Continue button (right side)
+        ttk.Button(
+            btn_frame,
+            text="Continue",
+            command=self.check_winget,
+            bootstyle=SUCCESS,
+            width=15
+        ).pack(side='right', padx=10)
 
-# Start the GUI event loop
-root.mainloop()
+    def check_winget(self):
+        """Verify Winget installation status"""
+        try:
+            subprocess.run(
+                ["winget", "--version"],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                check=True
+            )
+            self.show_winget_status(True)
+        except (subprocess.CalledProcessError, FileNotFoundError):
+            self.show_winget_status(False)
+
+    def show_winget_status(self, installed):
+        """Display Winget status screen"""
+        self.clear_window()
+
+        # Main content container
+        main_frame = ttk.Frame(self.root)
+        main_frame.pack(padx=20, pady=20, fill='both', expand=True)
+
+        # Status header
+        header_frame = ttk.Frame(main_frame)
+        header_frame.pack(fill='x', pady=10)
+        
+        ttk.Label(
+            header_frame,
+            text="System Requirements Check",
+            font=('Segoe UI', 16, 'bold'),
+            justify='center'
+        ).pack()
+
+        # Status message
+        status_frame = ttk.Frame(main_frame)
+        status_frame.pack(fill='both', expand=True, pady=15)
+        
+        status_text = "✓ Winget is installed" if installed else "✗ Winget not found!"
+        status_color = "#2ecc71" if installed else "#e74c3c"
+        
+        ttk.Label(
+            status_frame,
+            text=status_text,
+            font=('Segoe UI', 14, 'bold'),
+            foreground=status_color,
+            justify='center'
+        ).pack(pady=20)
+
+        # Action buttons at bottom
+        btn_frame = ttk.Frame(main_frame)
+        btn_frame.pack(side='bottom', pady=20, fill='x', expand=False)
+
+        if installed:
+            ttk.Button(
+                btn_frame,
+                text="Start Installation",
+                command=self.start_installation,
+                bootstyle=SUCCESS,
+                width=20
+            ).pack()
+        else:
+            ttk.Button(
+                btn_frame,
+                text="Install Winget",
+                command=self.install_winget,
+                bootstyle=DANGER,
+                width=20
+            ).pack(side='left', padx=10)
+
+            ttk.Button(
+                btn_frame,
+                text="Go Back",
+                command=self.create_main_screen,
+                bootstyle=SECONDARY,
+                width=20
+            ).pack(side='right', padx=10)
+
+    def clear_window(self):
+        """Remove all widgets from current window"""
+        for widget in self.root.winfo_children():
+            widget.destroy()
+
+    def install_winget(self):
+        """Install Winget package manager"""
+        ps_script = '''
+        $progressPreference = 'silentlyContinue'
+        Invoke-WebRequest -Uri https://aka.ms/getwinget -OutFile winget.msixbundle
+        Add-AppxPackage winget.msixbundle
+        '''
+        subprocess.run(["powershell", "-Command", ps_script], shell=True)
+        self.check_winget()
+
+    def start_installation(self):
+        """Start main installation process"""
+        print("Starting installation process...")
+        self.root.destroy()
+
+if __name__ == "__main__":
+    app = InstallationGUI()
+    app.root.mainloop()
